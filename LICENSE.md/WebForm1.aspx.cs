@@ -31,7 +31,11 @@ namespace payroll
         List<string> listB = new List<string>();
         List<string> listC = new List<string>();
         List<string> listD = new List<string>();
+        List<string> listN = new List<string>();
+        List<int> listP = new List<int>();
+   
         List<int> listG = new List<int>();
+        List<List<string>> listOflist = new List<List<string>>(); 
         string conStr = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\PayrollData.mdf;Integrated Security=True";
         int k = 0;
         protected void Button1_Click(object sender, EventArgs e)
@@ -47,13 +51,6 @@ namespace payroll
                     csvParser.SetDelimiters(new string[] { "," });
                     csvParser.HasFieldsEnclosedInQuotes = true;
                     csvParser.ReadLine();
-
-                  
-
-                  
-                   
-
-                
                 using (var reader = new StreamReader(@filename))
 
                 {
@@ -180,7 +177,7 @@ namespace payroll
                 List<string> listC = new List<string>();
                 List<string> listD = new List<string>();
 
-                using (SqlCommand command = new SqlCommand("Select * from PayrollData", con))
+                using (SqlCommand command = new SqlCommand("Select * from PayrollData ORDER BY employeeID", con))
                 {
                     con.Open();
                     SqlDataReader dr = command.ExecuteReader();
@@ -203,7 +200,7 @@ namespace payroll
                 try
                 {
                     File.AppendAllText(filepath, csvcont.ToString());
-                
+
                     using (StreamWriter writer = new StreamWriter(new FileStream(filepath,
                     FileMode.Create, FileAccess.Write)))
                     {
@@ -214,20 +211,41 @@ namespace payroll
                         for (int z = 0; z < k; z++)
                         {
                             string t = (listA[z]).Substring(1, 1);
-
+                            
+                         
                             if (t == "/")
                             {
 
                                 listA[z] = "0" + listA[z];
 
                             }
+                           
+
                         }
+                        k = listB.Count;
+                        for (int z = 0; z < k; z++)
+                        { 
+                            string b = (listA[z].Substring(4).Substring(0,1));
+                         
+                          
+                            if (b == "/")
+                            {
+
+                                listA[z] = listA[z].Substring(0, 2) + "/0" + listA[z].Substring(3).Substring(0, 3).Substring(0, 1) + listA[z].Substring(4);
+
+                            }
+
+                        }
+                        k = listB.Count;
+                      
+                        //MessageBox.Show(listA[32]);
+
 
                         k = listC.Count;
 
                         string m;
                         m = "";
-                        for (int i = 1; i < k; i++)
+                        for (int i = 0; i < k; i++)
                         {
                             if (listM.Contains(listC[i]))
                             {
@@ -241,74 +259,134 @@ namespace payroll
                             }
 
                         }
-                        for (int j = 0; j < k; j++)
+                        k = listA.Count;
+                        for (int i = 0; i < k; i++)
                         {
-                            if (listD[j] == "A")
+                       
+
+                            if (listP.Contains(Int32.Parse(listA[i].Substring(6))))
                             {
-                                listG.Add(30);
+
+                                m = "nothing yet";
                             }
                             else
                             {
+                                listP.Add(Int32.Parse(listA[i].Substring(6)));
+
+                            }
+
+                        }
+
+                       
+
+                        k = listA.Count;
+                        for (int i =0; i < k; i++)
+                        {
+                           
+
+                            if (listN.Contains(listA[i].Substring(3).Substring(0, 2)))
+                            {
+
+                                m = "nothing yet";
+                            }
+                            else
+                            {
+                                listN.Add(listA[i].Substring(3).Substring(0, 2));
+
+                            }
+                        }
+                        // MessageBox.Show((listN.Count).ToString());
+                        k = listD.Count;
+                        string val = "A";
+                        for (int j = 0; j < k; j++)
+                        {
+                           
+                        
+                        if (listD[j].Substring(0,1) == val)
+                            {
                                 listG.Add(20);
                             }
+                            else
+                            {
+                                listG.Add(30); 
+                            }
+                            //MessageBox.Show(listG[j].ToString());
                         }
 
-                        int count = 1;
-                        int amount = listM.Count + 1;
 
-                        k = listC.Count;
-
-                        while (count < amount)
+                        string rep,rep1;
+                        rep = "";
+                        rep1 = "";
+                        k = listB.Count;
+                        int lim1 = listP.Count;
+                        //MessageBox.Show(listN[2]);
+                        for (int t = 0; t < lim1; t++)
                         {
-                            for (int j = 0; j < k; j++)
+                            int lim = listN.Count;
+                            for (int x = 0; x < lim; x++)
                             {
+                                int count = 1;
+                                int amount = listM.Count + 1;
 
-                                if (Int32.Parse(listC[j]) == count && Int32.Parse((listA[j]).Substring(0, 2)) <= 15)
+                                while (count < amount)
                                 {
+                                    for (int j = 0; j < k; j++)
+                                    {
 
-                                    A++;
+                                        if (Int32.Parse(listC[j]) == count && Int32.Parse((listA[j]).Substring(0, 2)) <= 15 && listN[x] == listA[j].Substring(3).Substring(0, 2) && listP[t] == Int32.Parse(listA[j].Substring(6)))
+                                        {
 
-                                    C += Convert.ToDouble(listB[j]);
+                                            A++;
 
-                                    hr = listG[j];
+                                            C += Convert.ToDouble(listB[j]);
+
+                                            hr = listG[j];
+
+                                            rep = "01/" + listA[j].Substring(3).Substring(0, 2) + "/" + listA[j].Substring(6) + "-" + "15/" + listA[j].Substring(3).Substring(0, 2) + "/" + listA[j].Substring(6);
+                                        }
+                                        if (Int32.Parse(listC[j]) == count && Int32.Parse((listA[j]).Substring(0, 2)) > 15 && listN[x] == listA[j].Substring(3).Substring(0, 2) && listP[t] == Int32.Parse(listA[j].Substring(6)))
+                                        {
+
+                                            B++;
+                                            D += Convert.ToDouble(listB[j]);
+
+                                            hr = listG[j];
+                                           rep1 = "16/"+ listA[j].Substring(3).Substring(0, 2)+"/"+ listA[j].Substring(6) +"-"+ "30/" + listA[j].Substring(3).Substring(0, 2) + "/" + listA[j].Substring(6);
+
+                                        }
 
 
+                                    }
+                                    count++;
+
+
+                                    if (A != 0)
+                                    {
+                                        writer.WriteLine((count - 1).ToString() + "," + rep+ "," + (C * hr).ToString());
+                                        //listP.Add((count - 1).ToString());
+                                    }
+                                    if (B != 0)
+                                    {
+                                        writer.WriteLine((count - 1).ToString() + "," + rep1+ "," + (D * hr).ToString());
+                                        //listP.Add((count - 1).ToString());
+                                    }
+
+                                    A = 0;
+                                    B = 0;
+                                    C = 0;
+                                    D = 0;
                                 }
-                                if (Int32.Parse(listC[j]) == count && Int32.Parse((listA[j]).Substring(0, 2)) > 15)
-                                {
-
-                                    B++;
-                                    D += Convert.ToDouble(listB[j]);
-
-                                    hr = listG[j];
-
-
-                                }
 
 
 
                             }
-                            count++;
-
-                            if (A != 0)
-                            {
-                                writer.WriteLine((count - 1).ToString() + "," + "01/MM/YYYY - 15/MM/YYYY" + "," + (C * hr).ToString());
-                            }
-                            if (B != 0)
-                            {
-                                writer.WriteLine((count - 1).ToString() + "," + "16/MM/YYYY - 30/MM/YYYY" + "," + (D * hr).ToString());
-                            }
-
-                            A = 0;
-                            B = 0;
-                            C = 0;
-                            D = 0;
+                            
                         }
-
                         MessageBox.Show("Find your file in the documents folder");
                     }
                 }
-                catch(Exception ex) {
+                catch (Exception ex)
+                {
                     MessageBox.Show(ex.Message);
 
                 }
@@ -396,11 +474,6 @@ namespace payroll
         }
     }
 }
-
-
-
-
-
 
 
 
